@@ -1,0 +1,26 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+# macOS
+.DS_Store
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+
+# IDE / editor
+.vscode/
+.idea/
+
+# PyInstaller / build artifacts
+build/
+dist/
+*.spec
+.pyinstaller_config/
+
+# Logs
+*.log
+
