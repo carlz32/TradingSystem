@@ -86,6 +86,28 @@ def run_monte_carlo(rr_list, trades_per_run, num_runs):
     return totals, max_drawdowns
 
 
+def describe_win_rate(rr_list, totals):
+    if not rr_list or not totals:
+        raise ValueError("没有可用结果")
+    trade_total = len(rr_list)
+    trade_win_count = sum(1 for r in rr_list if r > 0)
+    trade_non_loss_count = sum(1 for r in rr_list if r >= 0)
+    trade_win_rate = trade_win_count / trade_total * 100
+    trade_non_loss_rate = trade_non_loss_count / trade_total * 100
+    run_total = len(totals)
+    run_positive_count = sum(1 for t in totals if t > 0)
+    run_non_loss_count = sum(1 for t in totals if t >= 0)
+    run_positive_rate = run_positive_count / run_total * 100
+    run_non_loss_rate = run_non_loss_count / run_total * 100
+    lines = []
+    lines.append("胜率统计")
+    lines.append(f"样本单笔交易胜率(>0R): {trade_win_rate:.2f}%")
+    lines.append(f"样本单笔交易不亏比例(≥0R): {trade_non_loss_rate:.2f}%")
+    lines.append(f"模拟结束总体盈利比例(最终盈亏>0R): {run_positive_rate:.2f}%")
+    lines.append(f"模拟结束不亏损比例(最终盈亏≥0R): {run_non_loss_rate:.2f}%")
+    return "\n".join(lines)
+
+
 def describe_distribution(values):
     if not values:
         raise ValueError("没有可用结果")
