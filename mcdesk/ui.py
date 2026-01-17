@@ -25,6 +25,7 @@ from .config import DATA_FILE
 from .core import (
     describe_distribution,
     describe_drawdown_distribution,
+    describe_win_rate,
     parse_rr_input,
     run_monte_carlo,
 )
@@ -34,7 +35,7 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("交易盈亏比蒙特卡洛模拟")
-        self.geometry("1200x800")
+        self.geometry("1360x960")
         self.last_totals = None
         self.last_drawdowns = None
         self.fig = None
@@ -56,7 +57,10 @@ class App(tk.Tk):
 
         tk.Label(history_frame, text="历史记录（最多10条）：").pack(anchor="w")
         self.history_list = tk.Listbox(history_frame, height=5)
-        self.history_list.pack(fill=tk.BOTH, expand=True, pady=2)
+        self.history_list.pack(side=tk.TOP, fill=tk.BOTH, expand=True, pady=2)
+        history_scroll_x = tk.Scrollbar(history_frame, orient=tk.HORIZONTAL, command=self.history_list.xview)
+        history_scroll_x.pack(side=tk.TOP, fill=tk.X)
+        self.history_list.configure(xscrollcommand=history_scroll_x.set)
         load_button = tk.Button(history_frame, text="载入选中", command=self.on_load_selected)
         load_button.pack(anchor="e", pady=2)
 
@@ -122,9 +126,10 @@ class App(tk.Tk):
             return
         try:
             totals, drawdowns = run_monte_carlo(rr_list, trades_per_run, num_runs)
-            summary = describe_distribution(totals)
+            summary_main = describe_distribution(totals)
+            summary_win = describe_win_rate(rr_list, totals)
             summary_dd = describe_drawdown_distribution(drawdowns)
-            summary = summary + "\n" + summary_dd
+            summary = summary_main + "\n\n" + summary_win + "\n" + summary_dd
         except ValueError as e:
             messagebox.showerror("错误", str(e))
             return
@@ -274,8 +279,6 @@ class App(tk.Tk):
         for index, entry in enumerate(self.history_entries):
             rr_text = entry.get("rr_text", "")
             preview = rr_text.replace("\n", " ")
-            if len(preview) > 30:
-                preview = preview[:30] + "..."
             label = f"{index + 1}: {preview}"
             self.history_list.insert(tk.END, label)
 
